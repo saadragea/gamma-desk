@@ -88,13 +88,16 @@ def build_scope(chain: Chain, scope: Scope, now: datetime) -> dict:
 
 def build_symbol(chain: Chain, now: datetime) -> dict:
     scopes = select({o.expiry for o in chain.options}, now.date(), chain.symbol)
-    change = chain.spot - chain.prev_close if chain.prev_close else None
+    change, change_pct = chain.change, chain.change_pct
+    if change is None and chain.prev_close:
+        change = chain.spot - chain.prev_close
+        change_pct = change / chain.prev_close * 100
     return {
         "symbol": chain.symbol,
         "kind": kind(chain.symbol),
         "spot": round(chain.spot, 2),
         "change": _r(change),
-        "change_pct": _r(change / chain.prev_close * 100 if change is not None else None),
+        "change_pct": _r(change_pct),
         "asof": chain.asof,
         "built": now.isoformat(timespec="seconds"),
         "scopes": [build_scope(chain, s, now) for s in scopes],

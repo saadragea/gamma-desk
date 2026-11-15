@@ -2,17 +2,19 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from itertools import pairwise
 
 from gammadesk.gex import StrikeRow
 
 NICE = (0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100, 250, 500, 1000)
-MAX_BINS = 24
+MAX_BINS = 40
 
 
 def _key(x: float, size: float) -> float:
-    return round(round(x / size) * size, 4)
+    """Nearest multiple of size, halves up (round() would send 7695 and 7705 to one bin)."""
+    return round(math.floor(x / size + 0.5) * size, 4)
 
 
 def profile(

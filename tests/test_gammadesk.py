@@ -42,6 +42,14 @@ def test_parse_reads_contracts_and_skips_odd_rows():
     assert cboe.quote_url("NVDA").endswith("/options/NVDA.json")
 
 
+def test_parse_prefers_cboe_change_fields():
+    b = spx()
+    b["data"].update(price_change=-12.97, price_change_percent=-0.17, prev_day_close=SPOT)
+    chain = cboe.parse(b, "SPX")
+    data = build.build_symbol(chain, NOW)
+    assert (data["change"], data["change_pct"]) == (-12.97, -0.17)
+
+
 def test_parse_rejects_wrong_shapes():
     with pytest.raises(FetchError, match="unexpected response"):
         cboe.parse({"x": 1}, "SPX")
@@ -125,6 +133,13 @@ def test_profile_bins_cover_the_walls():
     assert profile([], SPOT, None, None, None)["rows"] == []
 
 
+def test_profile_bins_split_halves_evenly():
+    rows = [gex.StrikeRow(k, net=1e9) for k in (7690, 7695, 7700, 7705, 7710)]
+    p = profile(rows, 7700, 7710, 7690, None, max_bins=8)  # 10-pt bins
+    assert p["bin"] == 10
+    assert {r["k"]: r["gex"] for r in p["rows"]} == {7710: 2.0, 7700: 2.0, 7690: 1.0}
+
+
 # --- build -------------------------------------------------------------------------------------
 
 def test_build_writes_files_keeps_stale_and_reports_errors(tmp_path, monkeypatch):
@@ -146,7 +161,7 @@ def test_build_writes_files_keeps_stale_and_reports_errors(tmp_path, monkeypatch
     assert index["errors"] == {"NVDA": "HTTP 403", "AMD": "TimeoutError"}
     assert index["stale"] == ["AMD"]
     data = json.loads((out / "SPX.json").read_text())
-    assert data["kind"] == "index" and data["change"] == 10.0
+    assert data["kind"] == "index" and data["change"] == 10.0  # from prev_day_close
     s0 = data["scopes"][0]
     assert s0["id"] == "0DTE" and (s0["cw"], s0["pw"]) == (7750.0, 7700.0)
     assert s0["regime"] in ("positive", "negative") and s0["net"] != 0

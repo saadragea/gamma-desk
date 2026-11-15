@@ -57,6 +57,8 @@ class Chain:
     prev_close: float | None
     asof: str | None  # Cboe's own timestamp for the snapshot, as given
     options: tuple[Option, ...]
+    change: float | None = None  # Cboe's price_change / price_change_percent when given
+    change_pct: float | None = None
 
 
 def quote_url(symbol: str) -> str:
@@ -115,6 +117,8 @@ def parse(body: object, symbol: str) -> Chain:
         prev_close=num(data.get("prev_day_close")),
         asof=str(asof) if asof else None,
         options=tuple(options),
+        change=num(data.get("price_change")),
+        change_pct=num(data.get("price_change_percent")),
     )
 
 
