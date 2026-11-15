@@ -45,7 +45,8 @@ def profile(
         bins[key] = bins.get(key, 0.0) + r.net
     return {
         "bin": size,
-        "rows": [{"k": k, "gex": round(v / 1e9, 4)} for k, v in sorted(bins.items(), reverse=True)],
+        # $bn to the $100, so a single stock's small bins keep their bars instead of rounding to 0
+        "rows": [{"k": k, "gex": round(v / 1e9, 7)} for k, v in sorted(bins.items(), reverse=True)],
         "cw_bin": None if cw is None else _key(cw, size),
         "pw_bin": None if pw is None else _key(pw, size),
     }

@@ -40,6 +40,15 @@ const fmt = {
     if (x >= 1e3) return (x / 1e3).toFixed(1) + 'K';
     return String(Math.round(x));
   },
+  // Dollar gamma comes in $bn. Single stocks are millions or thousands, so pick the unit
+  // from the size (0.0024bn reads -2.4 $M) instead of printing 0.00.
+  gexUnit(bn) {
+    const a = Math.abs(bn || 0);
+    if (a >= 1) return { u: 'bn', m: 1, d: 2 };
+    if (a >= 0.1) return { u: 'M', m: 1e3, d: 0 };
+    if (a >= 1e-3) return { u: 'M', m: 1e3, d: 1 };
+    return { u: 'K', m: 1e6, d: 0 };
+  },
   usd(x) {
     if (x == null) return '—';
     if (x >= 1e9) return '$' + (x / 1e9).toFixed(2) + 'B';
@@ -124,6 +133,9 @@ function session(d, s) {
 
   const rows = s.profile.rows;
   const maxAbs = rows.reduce((m, r) => Math.max(m, Math.abs(r.gex)), 0) || 1;
+  const nu = fmt.gexUnit(s.net);
+  const au = fmt.gexUnit(maxAbs);
+  const axis = (maxAbs * au.m).toFixed(au.d) + au.u;
   const items = rows.map((r) => ({ kind: 'bar', key: r.k, r }));
   items.push({ kind: 'spot', key: d.spot });
   if (s.flip != null && rows.length && s.flip <= rows[0].k && s.flip >= rows[rows.length - 1].k) items.push({ kind: 'flip', key: s.flip });
@@ -144,7 +156,7 @@ function session(d, s) {
 
   return `
   <div class="grid2">
-    <div class="card"><span class="label">NET GEX</span><span class="val ${s.net >= 0 ? 'pos' : 'neg'}">${fmt.signed(s.net, 2)}</span><span class="mono small muted">$bn / 1% move</span></div>
+    <div class="card"><span class="label">NET GEX</span><span class="val ${s.net >= 0 ? 'pos' : 'neg'}">${fmt.signed(s.net * nu.m, nu.d)}</span><span class="mono small muted">$${nu.u} / 1% move</span></div>
     <div class="card"><span class="label">FLIP</span><span class="val amber">${s.flip == null ? '—' : fmt.num(s.flip, 1)}</span><span class="ar small muted" dir="rtl">${flipSub}</span></div>
   </div>
   <div class="grid3">
@@ -156,23 +168,25 @@ function session(d, s) {
   <section class="card" aria-label="GEX profile">
     <div class="row between"><span class="label">GEX PROFILE · NET $ PER 1%</span><span class="bin">${s.profile.bin == null ? '' : fmt.strike(s.profile.bin) + '-pt bins'}</span></div>
     ${rows.length ? prof : '<div class="empty">ما فيه بيانات قاما لهذا الاستحقاق</div>'}
-    <div class="prow"><span class="k"></span><div class="bars mono small muted" style="justify-content:space-between"><span>−${maxAbs.toFixed(2)}bn</span><span>0</span><span>+${maxAbs.toFixed(2)}bn</span></div><span class="tag"></span></div>
+    <div class="prow"><span class="k"></span><div class="bars mono small muted" style="justify-content:space-between"><span>−${axis}</span><span>0</span><span>+${axis}</span></div><span class="tag"></span></div>
     <div class="legend"><span class="blue">— SPOT ${fmt.num(d.spot, 2)}</span>${s.flip == null ? '' : `<span class="amber">- - FLIP ${fmt.num(s.flip, 1)}</span>`}</div>
   </section>`;
 }
 
 function levels(d, s) {
   if (!s.levels.length) return '<div class="empty">ما فيه مستويات لهذا الاستحقاق</div>';
+  const lmax = s.levels.reduce((m, r) => Math.max(m, Math.abs(r.gex)), 0);
+  const lu = lmax >= 1 ? { u: '$M', m: 1, d: 1 } : { u: '$K', m: 1e3, d: 0 };  // gex in $M
   const nearest = s.levels.reduce((b, r) => (Math.abs(r.k - d.spot) < Math.abs(b.k - d.spot) ? r : b), s.levels[0]);
   const rows = s.levels.map((r) => {
     const tag = r.k === s.cw ? '<span class="pos" style="font-size:9.5px;font-weight:700">CW</span>' : (r.k === s.pw ? '<span class="neg" style="font-size:9.5px;font-weight:700">PW</span>' : '');
     return `<div class="tr lv${r === nearest ? ' near' : ''}"><span style="color:#E7EDF3">${fmt.strike(r.k)} ${tag}</span>` +
-      `<span class="r ${r.gex >= 0 ? 'pos' : 'neg'}">${fmt.signed(r.gex, 1)}</span><span class="r">${fmt.k(r.oi)}</span>` +
+      `<span class="r ${r.gex >= 0 ? 'pos' : 'neg'}">${fmt.signed(r.gex * lu.m, lu.d)}</span><span class="r">${fmt.k(r.oi)}</span>` +
       `<span class="r">${fmt.k(r.vol)}</span><span class="r">${r.iv == null ? '—' : r.iv.toFixed(1) + '%'}</span></div>`;
   }).join('');
   return `
   <div class="row between"><span class="label">TOP 10 STRIKES BY |GEX|</span><span class="ar small muted" dir="rtl">المظلل الأقرب للسعر</span></div>
-  <div class="table"><div class="tr lv head"><span>STRIKE</span><span class="r">GEX $M</span><span class="r">OI</span><span class="r">VOL</span><span class="r">IV</span></div>${rows}</div>
+  <div class="table"><div class="tr lv head"><span>STRIKE</span><span class="r">GEX ${lu.u}</span><span class="r">OI</span><span class="r">VOL</span><span class="r">IV</span></div>${rows}</div>
   <p class="note" dir="rtl">CW أكبر قاما موجبة، و PW أكبر قاما سالبة. الموجب يثبّت السعر غالبًا، والسالب يضخّم الحركة.</p>`;
 }
 

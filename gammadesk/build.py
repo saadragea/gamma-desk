@@ -65,7 +65,7 @@ def build_scope(chain: Chain, scope: Scope, now: datetime) -> dict:
     levels = [
         {
             "k": r.k,
-            "gex": round(r.net / 1e6, 1),
+            "gex": round(r.net / 1e6, 4),  # $M; 4 decimals so small stocks keep a value
             "oi": r.oi_c + r.oi_p,
             "vol": r.vol_c + r.vol_p,
             "iv": _r(r.iv * 100 if r.iv else None, 1),
@@ -77,7 +77,7 @@ def build_scope(chain: Chain, scope: Scope, now: datetime) -> dict:
         "label": scope.label,
         "expiries": [e.isoformat() for e in scope.expiries],
         "contracts": len(opts),
-        "net": round(net / 1e9, 4),
+        "net": round(net / 1e9, 7),  # $bn to the $100: a single stock is millions, not billions
         "flip": _r(fl),
         "cw": cw,
         "pw": pw,

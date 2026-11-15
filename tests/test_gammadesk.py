@@ -140,6 +140,13 @@ def test_profile_bins_split_halves_evenly():
     assert {r["k"]: r["gex"] for r in p["rows"]} == {7710: 2.0, 7700: 2.0, 7690: 1.0}
 
 
+def test_profile_keeps_small_single_stock_values():
+    # $30K per 1% in a bin must keep its bar (4 decimals of $bn rounded it to 0)
+    rows = [gex.StrikeRow(k, net=3e4) for k in (20.0, 21.0, 22.0)]
+    p = profile(rows, 21.0, 22.0, 20.0, None, max_bins=8)
+    assert [r["gex"] for r in p["rows"]] == [0.00003, 0.00003, 0.00003]
+
+
 # --- build -------------------------------------------------------------------------------------
 
 def test_build_writes_files_keeps_stale_and_reports_errors(tmp_path, monkeypatch):
