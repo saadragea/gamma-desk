@@ -32,5 +32,6 @@ pytest -q
 ```
 
 ## Notes
-- GitHub turns off scheduled workflows in a public repository after 60 days without activity;
-  Actions > Build gamma dashboard > Enable workflow turns it back on.
+- GitHub turns off scheduled workflows in a public repository after 60 days without activity.
+  `keepalive.yml` re-enables both workflows through the Actions API every Monday so that does
+  not happen; if it ever does, Actions > Build gamma dashboard > Enable workflow turns it back on.

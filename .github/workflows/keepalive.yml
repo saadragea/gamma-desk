@@ -1,0 +1,27 @@
+name: Keep schedule on
+
+# GitHub turns off scheduled workflows in a public repository after 60 days without
+# activity. Re-enabling them through the Actions API once a week keeps the dashboard's
+# 5-minute schedule, and this one, running without dummy commits (the same call the
+# keepalive-workflow action makes in its API mode).
+on:
+  schedule:
+    - cron: "23 12 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - run: |
+          for wf in build.yml keepalive.yml; do
+            gh api --method PUT "repos/$REPO/actions/workflows/$wf/enable"
+            echo "enabled $wf"
+          done
