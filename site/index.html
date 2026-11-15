@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saad Radar · Gamma</title>
+<meta name="description" content="مستويات القاما لصناع السوق على SPX و SPY و QQQ والأسهم الكبيرة، من بيانات Cboe المتأخرة.">
+<meta name="theme-color" content="#0A0E13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gamma">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="row between start">
+      <div class="brand">
+        <span class="name">Saad Radar</span>
+        <span class="mono sub" id="tabName">GAMMA · SESSION</span>
+      </div>
+      <div class="chips">
+        <span class="chip ar" dir="rtl">Cboe · متأخرة ~15 دقيقة</span>
+        <span class="muted ar small" dir="rtl" id="age">…</span>
+      </div>
+    </div>
+    <div class="row between end">
+      <div class="price">
+        <span class="mono spot" id="spot">—</span>
+        <span class="mono small" id="chg"></span>
+      </div>
+      <div class="symbols" role="group" aria-label="الرمز" id="symbols"></div>
+    </div>
+    <div class="row gap">
+      <label class="ar small muted" dir="rtl" for="stock">الأسهم</label>
+      <select id="stock" class="select mono"></select>
+    </div>
+    <div class="seg" role="group" aria-label="الاستحقاق" id="scopes"></div>
+    <div class="mono small muted" id="expiries"></div>
+  </header>
+  <main id="main" class="main" aria-live="polite"></main>
+  <nav class="nav" aria-label="الصفحات" id="nav">
+    <button type="button" data-tab="session">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></svg>
+      <span>Session</span>
+    </button>
+    <button type="button" data-tab="levels">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h13"/></svg>
+      <span>Levels</span>
+    </button>
+    <button type="button" data-tab="flow">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/></svg>
+      <span>Flow</span>
+    </button>
+  </nav>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
