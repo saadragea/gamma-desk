@@ -164,6 +164,9 @@ def test_build_writes_files_keeps_stale_and_reports_errors(tmp_path, monkeypatch
     assert data["kind"] == "index" and data["change"] == 10.0  # from prev_day_close
     s0 = data["scopes"][0]
     assert s0["id"] == "0DTE" and (s0["cw"], s0["pw"]) == (7750.0, 7700.0)
+    bars = {r["k"]: r["gex"] for r in s0["profile"]["rows"]}
+    assert bars[s0["cw"]] == max(bars.values()) and bars[s0["pw"]] == min(bars.values())
+    assert (s0["profile"]["cw_bin"], s0["profile"]["pw_bin"]) == (s0["cw"], s0["pw"])
     assert s0["regime"] in ("positive", "negative") and s0["net"] != 0
     assert len(s0["levels"]) == 10 and s0["flow"]["top"]["usd"]
     assert json.loads((out / "AMD.json").read_text())["stale"] is True

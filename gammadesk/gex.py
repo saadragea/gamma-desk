@@ -5,7 +5,8 @@ underlying, + for calls and - for puts. The sign assumes dealers are long the ca
 the puts the public holds; that is a convention, not something the data shows. It fits index
 options best; on single stocks the public often buys calls, so the sign there is weaker.
 
-Call Wall = the strike with the largest positive net GEX; Put Wall = the largest negative one.
+walls(): the strike with the largest positive net GEX (call wall) and the largest negative one
+(put wall). The dashboard applies it to the chart's strike bins (gammadesk/build.py).
 Flip = the underlying level where total GEX changes sign, found by recomputing every contract's
 gamma with Black-Scholes (its own IV, rates and dividends taken as 0) on a grid of levels around
 the price, and taking the crossing nearest the price.

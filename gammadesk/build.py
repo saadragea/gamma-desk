@@ -50,9 +50,13 @@ def build_scope(chain: Chain, scope: Scope, now: datetime) -> dict:
     opts = [o for o in chain.options if o.expiry in scope.expiries]
     rows = gex.by_strike(opts, spot, now)
     net = sum(r.net for r in rows)
-    cw, pw = gex.walls(rows)
     fl = gex.flip(opts, spot, now, FLIP_WIDTH[kind(chain.symbol)])
     em = gex.expected_move(opts, spot, scope.expiries[-1])
+    # The strike-level walls set the chart's range; the walls shown are the chart's own bins
+    # (largest green and red bar), so the CW/PW labels always sit on the biggest bars.
+    prof = profile(rows, spot, *gex.walls(rows), em)
+    cw, pw = gex.walls([gex.StrikeRow(b["k"], net=b["gex"]) for b in prof["rows"]])
+    prof["cw_bin"], prof["pw_bin"] = cw, pw
     if fl is not None:
         regime = "positive" if spot > fl else "negative"
     else:
@@ -80,7 +84,7 @@ def build_scope(chain: Chain, scope: Scope, now: datetime) -> dict:
         "em": _r(em),
         "em_pct": _r(em / spot * 100 if em else None),
         "regime": regime,
-        "profile": profile(rows, spot, cw, pw, em),
+        "profile": prof,
         "levels": levels,
         "flow": flow.summarize(opts, spot),
     }

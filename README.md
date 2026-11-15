@@ -15,7 +15,7 @@ data and published with GitHub Pages. Educational only, not investment advice.
 - GEX per contract = gamma x open interest x 100 x spot^2 x 1%, + calls, - puts (dealers assumed
   long calls and short puts: a convention, weaker on single stocks). Gamma from Cboe, or
   Black-Scholes from the contract's IV when Cboe gives none.
-- Call Wall / Put Wall = strike with the largest positive / negative net GEX.
+- Call Wall / Put Wall = the chart's strike bin with the largest positive / negative net GEX.
 - Flip = level nearest the price where total GEX changes sign, recomputing every contract's gamma
   with Black-Scholes (rates and dividends taken as 0) on a grid of levels.
 - Expected move = at-the-money straddle of the last expiration in the view.
