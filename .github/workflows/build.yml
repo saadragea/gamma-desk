@@ -3,10 +3,17 @@ name: Build gamma dashboard
 # Every 5 minutes on weekdays, 13:00-21:59 UTC (covers 09:25-16:20 New York in winter and
 # summer); outside those hours a scheduled run stops at once. A push or a manual run always
 # builds. Public repository, so Actions minutes cost nothing.
+# GitHub's scheduler started no runs on 2026-11-16, so cron-job.org also calls workflow_dispatch
+# every 5 minutes on weekdays with only_in_session=true (same hours check as a scheduled run).
 on:
   schedule:
     - cron: "*/5 13-21 * * 1-5"
   workflow_dispatch:
+    inputs:
+      only_in_session:
+        description: "Skip outside market hours (set by the external 5-minute timer)"
+        type: boolean
+        default: false
   push:
     branches: [main]
 
@@ -34,7 +41,7 @@ jobs:
         uses: actions/configure-pages@v6
       - id: build
         env:
-          SCHEDULED: ${{ github.event_name == 'schedule' }}
+          SCHEDULED: ${{ github.event_name == 'schedule' || github.event.inputs.only_in_session == 'true' }}
           SITE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
           FLAG=""

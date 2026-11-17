@@ -35,3 +35,6 @@ pytest -q
 - GitHub turns off scheduled workflows in a public repository after 60 days without activity.
   `keepalive.yml` re-enables both workflows through the Actions API every Monday so that does
   not happen; if it ever does, Actions > Build gamma dashboard > Enable workflow turns it back on.
+- GitHub's scheduler started no runs on 2026-11-16, so cron-job.org calls the `workflow_dispatch`
+  API every 5 minutes on weekdays with `only_in_session: true`, using a fine-grained token that
+  can only run Actions in this repository and the scanner's.
